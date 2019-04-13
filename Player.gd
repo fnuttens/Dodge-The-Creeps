@@ -3,7 +3,9 @@ extends Area2D
 signal hit
 
 export var speed = 400 # How fast the player will move (pixels/sec)
+var velocity = Vector2()
 var screen_size # Size of the game window
+var target = Vector2() # Hold clicked position
 
 func _ready():
 	screen_size = get_viewport_rect().size
@@ -11,40 +13,30 @@ func _ready():
 
 func start(pos):
 	position = pos
+	# Initial target is the start position
+	target = pos
 	show()
 	$CollisionShape2D.disabled = false
 
-func _process(delta):
-	var velocity = get_direction_from_input()
+func _input(event):
+	if event is InputEventScreenTouch and event.pressed:
+		target = event.position
 
+func _process(delta):
+	# Move towards the target and stop when close.
+	if position.distance_to(target) > 10:
+		velocity = (target - position).normalized() * speed
+	else:
+		velocity = Vector2()
+	
 	if velocity.length() > 0:
 		$AnimatedSprite.play()
-		update_position(velocity, delta)
+		velocity = velocity.normalized() * speed
+		position += velocity * delta
 	else:
 		$AnimatedSprite.stop()
-
-	update_animation(velocity)
-
-func get_direction_from_input():
-	var velocity = Vector2() # The player's movement vector
-	if Input.is_action_pressed("ui_right"):
-		velocity.x += 1
-	if Input.is_action_pressed("ui_left"):
-		velocity.x -= 1
-	if Input.is_action_pressed("ui_down"):
-		velocity.y += 1
-	if Input.is_action_pressed("ui_up"):
-		velocity.y -= 1
-	return velocity
-
-func update_position(velocity, delta):
-	# Avoid faster diagonals
-	velocity = velocity.normalized() * speed
 	
-	position += velocity * delta
-	# Keep player from going out of screen
-	position.x = clamp(position.x, 0, screen_size.x)
-	position.y = clamp(position.y, 0, screen_size.y)
+	update_animation(velocity)
 
 func update_animation(velocity):
 	if velocity.x != 0:
