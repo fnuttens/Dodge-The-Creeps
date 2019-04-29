@@ -3,24 +3,26 @@ extends CanvasLayer
 signal start_game
 
 func show_message(text):
-	$MessageLabel.text = text
-	$MessageLabel.show()
+	$VBoxContainer/MessageLabel.text = text
+	$VBoxContainer/MessageLabel.show()
 	$MessageTimer.start()
 
 func show_game_over():
 	show_message("Game Over")
 	yield($MessageTimer, "timeout")
-	$MessageLabel.text = "Dodge the\nCreeps!"
-	$MessageLabel.show()
+	$VBoxContainer/MessageLabel.text = "Dodge the\nCreeps!"
+	$VBoxContainer/MessageLabel.show()
 	yield(get_tree().create_timer(1), 'timeout')
-	$StartButton.show()
+	$VBoxContainer/VBoxContainer/StartButton.show()
+	$VBoxContainer/VBoxContainer/HighScoresButton.show()
 
 func update_score(score):
-	$ScoreLabel.text = str(score)
+	$VBoxContainer/ScoreLabel.text = str(score)
 
 func _on_StartButton_pressed():
-	$StartButton.hide()
+	$VBoxContainer/VBoxContainer/StartButton.hide()
+	$VBoxContainer/VBoxContainer/HighScoresButton.hide()
 	emit_signal("start_game")
 
 func _on_MessageTimer_timeout():
-	$MessageLabel.hide()
+	$VBoxContainer/MessageLabel.hide()
